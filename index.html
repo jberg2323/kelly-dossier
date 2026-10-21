@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Kelly Dossier</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kelly">
+<meta name="theme-color" content="#17382B">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#17382B; --moss:#2E6A4A; --mint:#EEF4EA; --paper:#F7F9F3; --gold:#C99A3C; --ink:#152019;
+  --bg:var(--mint); --card:var(--paper); --fg:var(--ink); --muted:#5A6B60; --line:#CFDCCF; --accent:var(--moss); --accent-ink:#fff; --hero:var(--forest); --hero-fg:#F3F7EE; --chip:#DCE8D8;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#0F1F18; --card:#16291F; --fg:#E9F0E6; --muted:#9DB0A3; --line:#28403A; --accent:#6FB58C; --accent-ink:#0F1F18; --hero:#0B1712; --hero-fg:#EAF2E7; --chip:#1F3A2E; color-scheme:dark;
+}}
+:root[data-theme="dark"]{ --bg:#0F1F18; --card:#16291F; --fg:#E9F0E6; --muted:#9DB0A3; --line:#28403A; --accent:#6FB58C; --accent-ink:#0F1F18; --hero:#0B1712; --hero-fg:#EAF2E7; --chip:#1F3A2E; color-scheme:dark; }
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0; background:var(--bg); color:var(--fg); font-family:"DM Sans",-apple-system,"Helvetica Neue",Arial,sans-serif; font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; height:100%; -webkit-tap-highlight-color:transparent}
+h1,h2,h3,.serif{font-family:"Fraunces","Iowan Old Style",Georgia,serif; font-weight:400; letter-spacing:-0.01em; margin:0}
+img,svg{max-width:100%}
+button{font:inherit; color:inherit}
+.view{display:none; padding:0 18px 110px}
+.view.active{display:block}
+.inner{max-width:560px; margin:0 auto}
+.hero{background:var(--hero); color:var(--hero-fg); margin:0 -18px; padding:calc(22px + env(safe-area-inset-top,0px)) 18px 26px}
+.hero .inner{display:flex; flex-direction:column; gap:10px}
+.hero h1{font-size:40px; line-height:1; font-variation-settings:"opsz" 144; }
+.hero h1 em{font-style:italic; font-weight:300}
+.hero p.sub{margin:0; color:#B9CDB9; font-size:14px}
+.wheel-wrap{position:relative; width:100%; max-width:340px; margin:8px auto 0}
+.wheel-wrap svg{width:100%; height:auto; display:block}
+.planet{cursor:pointer}
+.planet circle{transition:r .15s}
+.planet.sel circle{stroke:var(--gold); stroke-width:3}
+.planet text{font-family:"Fraunces",Georgia,serif; font-size:13px; fill:#F3F7EE; pointer-events:none}
+.sign-label{font-family:"Fraunces",Georgia,serif; font-size:10px; fill:#8FAE98}
+.readout{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px 14px; min-height:84px}
+.readout h3{font-size:18px; color:var(--gold)}
+.readout p{margin:4px 0 0; font-size:14px; color:#D5E3D4}
+.readout .hint{color:#8FAE98; font-size:13px}
+.sec{margin-top:26px}
+.sec h2{font-size:28px; line-height:1.1; margin-bottom:6px}
+.lede{color:var(--muted); margin:0 0 14px; font-size:15px}
+.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:10px}
+.facts{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px}
+.fact{background:var(--chip); border-radius:12px; padding:10px 12px}
+.fact b{display:block; font-family:"Fraunces",Georgia,serif; font-weight:500; font-size:20px; line-height:1.1}
+.fact span{font-size:12px; color:var(--muted)}
+details{border-top:1px solid var(--line)}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:14px 2px; gap:10px}
+summary::-webkit-details-marker{display:none}
+summary .t{font-family:"Fraunces",Georgia,serif; font-size:20px}
+summary .s{font-size:13px; color:var(--muted); display:block}
+summary .arrow{width:28px; height:28px; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; flex:none; transition:transform .2s}
+details[open] summary .arrow{transform:rotate(45deg); background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+details .body{padding:0 2px 16px; font-size:15px}
+details .body p{margin:0 0 10px}
+.conf{display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; background:var(--chip); color:var(--muted); margin-left:6px; vertical-align:middle}
+.tag{display:inline-block; font-size:13px; padding:4px 10px; border-radius:999px; background:var(--chip); margin:0 6px 6px 0}
+.ll{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:8px}
+.ll button{background:var(--chip); border:1px solid transparent; border-radius:12px; padding:10px 4px; font-size:12px; line-height:1.15; display:flex; flex-direction:column; align-items:center; gap:4px; min-height:64px}
+.ll button .n{font-family:"Fraunces",Georgia,serif; font-size:22px; font-weight:500; line-height:1}
+.ll button.hot{background:var(--accent); color:var(--accent-ink)}
+.ll-note{font-size:13px; color:var(--muted); margin-top:8px}
+.step{display:flex; gap:12px; align-items:flex-start; padding:14px 2px; border-top:1px solid var(--line)}
+.step:last-child{border-bottom:1px solid var(--line)}
+.chk{flex:none; width:30px; height:30px; border-radius:50%; border:2px solid var(--accent); background:transparent; display:grid; place-items:center; margin-top:2px}
+.chk svg{opacity:0; transition:opacity .15s}
+.step.done .chk{background:var(--accent)}
+.step.done .chk svg{opacity:1}
+.step.done .txt h3{text-decoration:line-through; text-decoration-color:var(--muted); opacity:.7}
+.step .txt h3{font-size:19px; margin-bottom:3px}
+.step .txt p{margin:0; font-size:14px; color:var(--muted)}
+.step .why{font-size:13px; margin-top:6px; color:var(--fg); background:var(--chip); border-radius:10px; padding:8px 10px}
+.progress{height:8px; background:var(--chip); border-radius:99px; overflow:hidden; margin:10px 0 6px}
+.progress i{display:block; height:100%; width:0; background:var(--accent); transition:width .3s}
+.burger{display:flex; align-items:center; gap:12px; padding:12px 0; border-top:1px solid var(--line)}
+.burger:last-child{border-bottom:1px solid var(--line)}
+.burger .rank{font-family:"Fraunces",Georgia,serif; font-size:24px; width:30px; color:var(--muted); text-align:center}
+.burger .name{flex:1}
+.burger .name b{display:block; font-weight:600}
+.burger .name span{font-size:13px; color:var(--muted)}
+.stars{display:flex; gap:3px}
+.stars button{width:30px; height:34px; border:0; background:none; padding:0; font-size:20px; color:var(--line)}
+.stars button.on{color:var(--gold)}
+.add{display:flex; gap:8px; margin-top:12px}
+.add input{flex:1; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:12px; padding:12px 14px; font:inherit; font-size:16px}
+.btn{border:0; background:var(--accent); color:var(--accent-ink); border-radius:12px; padding:12px 16px; font-weight:600}
+.btn.ghost{background:var(--chip); color:var(--fg)}
+.note{font-size:13px; color:var(--muted)}
+.cats{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 12px}
+.cats button{border:1px solid var(--line); background:var(--card); border-radius:999px; padding:8px 13px; font-size:14px}
+.cats button.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.txtcard{background:var(--hero); color:var(--hero-fg); border-radius:16px; padding:18px 18px 14px; margin-bottom:10px}
+.txtcard p{font-family:"Fraunces",Georgia,serif; font-size:21px; line-height:1.3; margin:0 0 14px; min-height:84px}
+.txtcard .row{display:flex; gap:8px}
+.txtcard .row button{flex:1; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:var(--hero-fg); border-radius:12px; padding:11px; font-weight:600}
+.txtcard .row button.primary{background:var(--gold); color:#1c1a12; border-color:var(--gold)}
+.ideas{margin:0; padding:0; list-style:none}
+.ideas li{padding:10px 0; border-top:1px solid var(--line); font-size:15px}
+.ideas li:first-child{border-top:0}
+.ideas li b{font-weight:600}
+.moon{counter-reset:m}
+.moon .card{display:flex; gap:12px}
+.moon .card::before{counter-increment:m; content:counter(m); font-family:"Fraunces",Georgia,serif; font-size:30px; line-height:1; color:var(--gold); flex:none; width:30px}
+.moon .card h3{font-size:19px; margin-bottom:4px}
+.moon .card p{margin:0; font-size:14px; color:var(--muted)}
+textarea.notes{width:100%; min-height:120px; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:12px; padding:12px 14px; font:inherit; font-size:16px; resize:vertical}
+.src p{margin:0 0 10px; font-size:14px}
+.src b{font-weight:600}
+nav.tabs{position:fixed; left:0; right:0; bottom:0; background:var(--card); border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px)); z-index:20}
+nav.tabs button{flex:1; border:0; background:none; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0; font-size:10.5px; color:var(--muted); border-radius:12px; min-width:0}
+nav.tabs button svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+nav.tabs button.on{color:var(--accent)}
+nav.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.topbar{position:fixed; top:0; left:0; right:0; height:env(safe-area-inset-top,0px); background:var(--hero); z-index:30}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<section class="view active" id="v-chart">
+  <div class="hero"><div class="inner">
+    <h1>The Kelly <em>Dossier</em></h1>
+    <p class="sub">Kelly Anne Driscoll · born May 1, 1987, 12:15 AM, Albuquerque</p>
+    <div class="wheel-wrap"><svg id="wheel" viewBox="0 0 340 340" role="img" aria-label="Natal chart wheel, tap a planet"></svg></div>
+    <div class="readout" id="readout"><h3>Tap a planet</h3><p class="hint">Each one is a lever in the friendship. Start with the Sun.</p></div>
+  </div></div>
+  <div class="inner">
+    <div class="sec">
+      <h2>At a glance</h2>
+      <div class="facts">
+        <div class="fact"><b>Taurus</b><span>Sun · 10°</span></div>
+        <div class="fact"><b>Gemini</b><span>Moon · ~19°</span></div>
+        <div class="fact"><b>Capricorn</b><span>Rising · ~8°, Neptune on it</span></div>
+        <div class="fact"><b>Aries ×3</b><span>Venus, Jupiter, North Node</span></div>
+        <div class="fact"><b>4 / 11 / 33</b><span>Life Path · Expression · Soul Urge</span></div>
+        <div class="fact"><b>4/6</b><span>Human Design profile</span></div>
+        <div class="fact"><b>Four Ways</b><span>Right Angle Cross</span></div>
+        <div class="fact"><b>Fire Rabbit</b><span>Chinese zodiac</span></div>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>The systems</h2>
+      <p class="lede">Open each one. The parts that disagree are as useful as the parts that rhyme.</p>
+      <details open>
+        <summary><div><span class="t">Astrology</span><span class="s">Loyal core, talkative moon, bold appetite</span></div><span class="arrow">+</span></summary>
+        <div class="body">
+          <p><b>Taurus Sun, Capricorn rising.</b> Slow to trust, allergic to flakiness, keeps a quiet ledger of who shows up. Reliability outranks any grand gesture.</p>
+          <p><b>Gemini Moon and Mars.</b> Needs talk, novelty and banter. The friendship wants a steady rhythm plus surprise.</p>
+          <p><b>Venus, Jupiter and North Node in Aries.</b> Drawn to direct people who initiate. A plain ask earns more respect than a hedge.</p>
+          <p><b>Neptune on the Ascendant.</b> The "3.5 lives in Austin" signature: she reinvents, absorbs rooms, reads people. She clocks performance instantly.</p>
+          <p><b>Saturn and Uranus in Sagittarius, Pluto in Scorpio.</b> Generational, but it adds a restless, truth-seeking edge under the earthy exterior.</p>
+        </div>
+      </details>
+      <details>
+        <summary><div><span class="t">Numerology</span><span class="s">The builder with a mystic's wiring</span></div><span class="arrow">+</span></summary>
+        <div class="body">
+          <span class="tag">Life Path 4</span><span class="tag">Birthday 1</span><span class="tag">Expression 11</span><span class="tag">Soul Urge 33/6</span><span class="tag">Personality 5</span><span class="tag">Personal Year 7</span>
+          <p style="margin-top:8px"><b>Life Path 4</b> wants structure and follow-through. <b>Expression 11</b> and <b>Soul Urge 33</b> are the intuitive, caretaker layer, which is exactly why she can't pick one love language: she runs all of them, so she notices when you only run one.</p>
+          <p><b>Personality 5</b> is the move-across-the-country, start-a-beverage-brand restlessness other people meet first.</p>
+          <p><b>Personal Year 7 (2026)</b> is a reflective, who-are-my-real-people year. Good year to be applying.</p>
+        </div>
+      </details>
+      <details>
+        <summary><div><span class="t">Human Design</span><span class="s">4/6 · likely Manifestor · Cross of the Four Ways</span></div><span class="arrow">+</span></summary>
+        <div class="body">
+          <span class="tag">Sun 24.4</span><span class="tag">Earth 44.4</span><span class="tag">Design Sun 19.6</span><span class="tag">Design Earth 33.6</span>
+          <p style="margin-top:8px"><b>4/6 profile.</b> Her life runs on network and the quality of her inner circle. Sixth-line people spend their 30s "on the roof" observing after a chaotic first act. At 39 she's coming down and auditioning who gets long-term access.</p>
+          <p><b>Gate 44</b> reads who's in the room and who isn't trustworthy. <b>Gate 19</b> is sensitivity to belonging, food, touch and community. That's where the burger quest and "all the love languages" live.</p>
+          <p><b>If she's a Manifestor</b> <span class="conf">verify</span>: don't manage her, inform her, and let her initiate the plan sometimes. Splenic authority means her first instinct is usually right and she won't explain it.</p>
+        </div>
+      </details>
+      <details>
+        <summary><div><span class="t">Gene Keys</span><span class="s">Invention, teamwork, sensitivity, storytelling</span></div><span class="arrow">+</span></summary>
+        <div class="body">
+          <p><b>Life's Work · 24</b> Addiction → Invention → Silence. Her mind loops until it invents a way out. Give her problems, not platitudes.</p>
+          <p><b>Evolution · 44</b> Interference → Teamwork → Synarchy. Her growth edge is picking the right people and trusting them.</p>
+          <p><b>Radiance · 19</b> Co-dependence → Sensitivity → Sacrifice. She lights up when needs are noticed before they're spoken.</p>
+          <p><b>Purpose · 33</b> Forgetting → Mindfulness → Revelation. The storyteller key. Ask for the Baylor story and the beverage-brand story in full, and listen to the end.</p>
+        </div>
+      </details>
+      <details>
+        <summary><div><span class="t">Chinese zodiac</span><span class="s">Fire Rabbit</span></div><span class="arrow">+</span></summary>
+        <div class="body"><p>Diplomatic, aesthetic, conflict-averse on the surface with real heat underneath. Fire Rabbits leave quietly rather than fight; you rarely get a second warning. Keep the room warm and the honesty gentle.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-profile">
+  <div class="inner">
+    <div class="sec">
+      <h2>How she's wired</h2>
+      <p class="lede">The synthesis, in plain English.</p>
+      <div class="card">
+        <p style="margin:0 0 10px">She is loyal, slow to open, and quietly keeps score of reliability. Once you're in, you're in for decades. She needs conversation that moves, people who make decisive plans, and friends who are the same person in every room, because she reads rooms for a living.</p>
+        <p style="margin:0 0 10px">She gives in every love language at once and will feel the gap if you only give in one. She reinvents herself in chapters, so meet the current Kelly, not the one from the story you heard.</p>
+        <p style="margin:0">2026 is her sorting year. She's choosing her long-term people right now.</p>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>Love language tracker</h2>
+      <p class="lede">She says it's probably all of them. Tap one each time she visibly lights up and see which wins.</p>
+      <div class="card">
+        <div class="ll" id="ll"></div>
+        <p class="ll-note" id="ll-note">No data yet. Run the experiment for two weeks.</p>
+        <button class="btn ghost" style="margin-top:10px; font-size:13px; padding:8px 12px" onclick="resetLL()">Reset counts</button>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>Do / don't</h2>
+      <div class="card">
+        <p style="margin:0 0 6px"><b>Do:</b> show up when you said you would. Ask plainly. Tell her the plan. Bring something green and useful. Let her go quiet without chasing.</p>
+        <p style="margin:0"><b>Don't:</b> cancel last minute. Hedge. Perform. Over-text when she's recharging. Only ever do the one love language that's easy for you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-texts">
+  <div class="inner">
+    <div class="sec">
+      <h2>What to text her</h2>
+      <p class="lede">Pick a lane, tap Another until one sounds like you, copy, send. Gemini Moon rewards the follow-up more than the opener.</p>
+      <div class="cats" id="cats"></div>
+      <div class="txtcard"><p id="txt"></p><div class="row"><button onclick="nextTxt()">Another</button><button class="primary" id="copybtn" onclick="copyTxt()">Copy</button></div></div>
+      <p class="note">Rules: one text, not three. Ask one question, not a list. If she goes quiet, wait; the next one is on her.</p>
+    </div>
+    <div class="sec">
+      <h2>Things she's told me</h2>
+      <p class="lede">Log details here the minute she mentions them. Quoting her back a month later is the whole game with a Taurus.</p>
+      <textarea class="notes" id="notes" placeholder="Her mom's name. The burger she rated a 5. The thing she said she wanted to try. Dates that matter."></textarea>
+      <p class="note" id="notesnote">Saved on this phone.</p>
+    </div>
+    <div class="sec">
+      <h2>Love language idea bank</h2>
+      <p class="lede">All five, built for her chart. Rotate them and log hits on the Her tab.</p>
+      <details open>
+        <summary><div><span class="t">Words</span><span class="s">Specific beats sweet</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>Name the thing nobody names.</b> Not "you're amazing" but "the way you rebuilt after the brand folded is the most impressive thing I know about anyone in Austin."</li>
+          <li><b>Voice memo instead of text</b> once a week. Gemini Moon hears tone; texts flatten it.</li>
+          <li><b>Quote her back.</b> "You said in August you wanted to X. Did you?" Proves you listen, which is the only compliment a Capricorn rising believes.</li>
+          <li><b>Hype her publicly.</b> Brag about her to someone while she's standing there.</li>
+        </ul></div>
+      </details>
+      <details>
+        <summary><div><span class="t">Time</span><span class="s">Rhythm plus surprise</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>A standing slot.</b> Burger night, same week, same cadence. Taurus trusts calendars, not vibes.</li>
+          <li><b>One undistracted hour.</b> Phone face-down in the bag. She will notice the phone before she notices anything you say.</li>
+          <li><b>Go first to her stuff.</b> Whatever she's launching, hosting or nervous about, be in the room early.</li>
+          <li><b>A long walk with no agenda.</b> Gemini Moon talks best moving.</li>
+        </ul></div>
+      </details>
+      <details>
+        <summary><div><span class="t">Gifts</span><span class="s">Green, useful, never clutter</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>Hatch green chile shipped from New Mexico.</b> Albuquerque girl, favorite color green. This one's a layup.</li>
+          <li><b>A plant that's hard to kill</b> in a good pot. Taurus wants quality and permanence.</li>
+          <li><b>A burger scorecard, printed and bound.</b> Turns the quest into an object.</li>
+          <li><b>The thing she mentioned once.</b> Pull it from your notes above. The gift is the memory, not the item.</li>
+          <li><b>May 1 birthday: experience over object.</b> A table somewhere she's wanted to go, planned to the minute.</li>
+        </ul></div>
+      </details>
+      <details>
+        <summary><div><span class="t">Acts</span><span class="s">Handle the logistics</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>Do the research and the booking.</b> Send the plan, not the question. Aries Venus wants someone else to move sometimes too.</li>
+          <li><b>Show up with food on a slammed day</b> without being asked. Gate 19 lives here.</li>
+          <li><b>Fix the thing.</b> The site, the spreadsheet, the intro she needs. You're good at this; use it.</li>
+          <li><b>Be the ride.</b> Airport, event, the appointment nobody wants to go to alone.</li>
+        </ul></div>
+      </details>
+      <details>
+        <summary><div><span class="t">Touch</span><span class="s">Warm and unmistakably safe</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>A real hug hello and goodbye.</b> Taurus is tactile; a half-hug reads as half-in.</li>
+          <li><b>Sit beside her, not across.</b> Booths over tables.</li>
+          <li><b>High fives and shoulder squeezes</b> for wins. Celebration touch, zero ambiguity.</li>
+          <li><b>Read her first.</b> Splenic people flinch from unwanted contact fast. Match what she offers.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="sec moon">
+      <h2>To the moon</h2>
+      <p class="lede">The moves that turn a good friend into a best friend for life.</p>
+      <div class="card"><div><h3>Be identical in every room</h3><p>Neptune on her Ascendant means she reads incongruence instantly. The friend who's the same at the burger joint, the fundraiser and the hard phone call is the one she keeps.</p></div></div>
+      <div class="card"><div><h3>Remember everything</h3><p>Use the notes box. A 4/6 chooses her inner circle by who pays attention. Quoting her back a month later is worth a hundred compliments.</p></div></div>
+      <div class="card"><div><h3>Give her your people</h3><p>Fourth-line profiles grow through network. Introduce her to the best humans you know with a specific reason each time. You're built for this.</p></div></div>
+      <div class="card"><div><h3>Celebrate loud, mourn quiet</h3><p>Her wins get the group text. Her losses get a text that says "I'm around, no reply needed" and then actual silence.</p></div></div>
+      <div class="card"><div><h3>Never make her the caretaker</h3><p>Soul Urge 33 people get used. Be the friend who needs nothing from her. That's the rarest thing in her life.</p></div></div>
+      <div class="card"><div><h3>Name the ritual</h3><p>Burger night needs a name, a scorecard and a trophy. Taurus loves tradition; Gemini loves the bit.</p></div></div>
+      <div class="card"><div><h3>Own May 1</h3><p>Plan her birthday like a product launch. Taurus birthdays are a loyalty test and almost everyone fails it.</p></div></div>
+      <div class="card"><div><h3>Be the 1 AM call</h3><p>Say it once, plainly: "If it goes sideways, you call me, any hour." Then answer when it does. That's the whole moon.</p></div></div>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-playbook">
+  <div class="inner">
+    <div class="sec">
+      <h2>The playbook</h2>
+      <p class="lede">Six moves. Check them off as you do them. Progress saves on this phone.</p>
+      <div class="progress"><i id="pbar"></i></div>
+      <p class="note" id="pnote">0 of 6</p>
+      <div id="steps"></div>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-burgers">
+  <div class="inner">
+    <div class="sec">
+      <h2>The burger quest</h2>
+      <p class="lede">One spot a week, scored together. Tap stars to rate. The list re-sorts itself. Check each spot is still open before you go.</p>
+      <div id="burgers"></div>
+      <div class="add">
+        <input id="newb" placeholder="Add a spot" aria-label="Add a burger spot">
+        <button class="btn" onclick="addBurger()">Add</button>
+      </div>
+      <p class="note" style="margin-top:10px">Rule: she picks every other week. Aries Venus wants to initiate; Manifestors hate being scheduled.</p>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-sources">
+  <div class="inner">
+    <div class="sec src">
+      <h2>How I got this</h2>
+      <p class="lede">What's solid, what's a hand calculation, and what to verify.</p>
+      <div class="card">
+        <p><b>Birth data.</b> May 1, 1987, 12:15 AM, Albuquerque → converted to 06:15 UT (Mountain Daylight Time was in effect). Coordinates 35.1°N, 106.6°W.</p>
+        <p><b>Sun.</b> From the date alone. High confidence.</p>
+        <p><b>Moon.</b> Counted forward from the April 28, 1987 new moon (~3.2 days × ~13°/day). Moderate confidence; could be off a few degrees but stays in Gemini.</p>
+        <p><b>Ascendant.</b> Sidereal-time calculation by hand. Moderate confidence; a 15-minute error in birth time moves it ~4°, still Capricorn. Neptune-on-Ascendant depends on both being near 7–8°, so treat that as likely rather than certain.</p>
+        <p><b>Other planets.</b> From remembered 1987 positions. High confidence for Jupiter through Pluto and the North Node; lower for Mercury, which was stationing direct near the Aries/Taurus cusp.</p>
+        <p><b>Numerology.</b> Pythagorean arithmetic on "Kelly Anne Driscoll" with Y counted as a vowel. High confidence.</p>
+        <p><b>Human Design.</b> Sun degrees mapped to the standard gate wheel (Sun 24.4, design Sun 88° earlier = 19.6). Profile 4/6 and the cross are solid. The Manifestor call depends on Venus landing in Gate 21 and Saturn in Gate 26, each within a couple of degrees of a boundary, and I didn't compute design-side planets beyond Sun and Earth. Verify the type.</p>
+        <p><b>Gene Keys.</b> Follow directly from the Human Design gates.</p>
+        <p><b>Burger list.</b> General knowledge, no search. Check hours.</p>
+        <p><b>To raise confidence:</b> run the birth data through astro.com and mybodygraph.com and check the Moon degree, the Ascendant, and the HD type. Everything else should hold.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<nav class="tabs" aria-label="Sections">
+  <button data-v="chart" class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg>Chart</button>
+  <button data-v="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>Her</button>
+  <button data-v="texts"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Texts</button>
+  <button data-v="playbook"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Playbook</button>
+  <button data-v="burgers"><svg viewBox="0 0 24 24"><path d="M4 10a8 8 0 0 1 16 0z"/><path d="M3 14h18M4 17h16a2 2 0 0 1-2 3H6a2 2 0 0 1-2-3z"/></svg>Burgers</button>
+  <button data-v="sources"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>Sources</button>
+</nav>
+<script>
+const store = {
+  get(k, d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const tabs=[...document.querySelectorAll('nav.tabs button')];
+function show(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.id==='v-'+v));
+  tabs.forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  window.scrollTo(0,0);
+  try{ history.replaceState(null,'','#'+v); }catch(e){}
+}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+const h=(location.hash||'').replace('#','');
+if(['chart','profile','texts','playbook','burgers','sources'].includes(h)) show(h);
+const glyphs=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const planets=[
+ {g:'☉',n:'Sun',lon:40.5,title:'Sun in Taurus',text:'Her core. Loyal, sensual, stubborn, slow to trust and impossible to lose once she trusts. Reliability is the currency. Show up, every time.'},
+ {g:'☽',n:'Moon',lon:79.5,title:'Moon in Gemini',text:'Her emotional engine runs on words. She processes by talking, needs variety, and feels loved when someone keeps up with the conversation. Send the article. Ask the follow-up question.'},
+ {g:'AC',n:'Ascendant',lon:278,title:'Capricorn rising, Neptune conjunct',text:'The surface is composed and capable; underneath, Neptune makes her porous. She reads rooms, absorbs moods, and reinvents in chapters. Be real; she will know.'},
+ {g:'☿',n:'Mercury',lon:28,title:'Mercury in late Aries (stationing)',text:'Fast, blunt, decisive speech when it comes, with occasional second-guessing after. She respects directness and gets bored by hedging. Lower confidence on the exact degree.'},
+ {g:'♀',n:'Venus',lon:10,title:'Venus in Aries',text:'How she loves and what she is drawn to: initiative, courage, people who make the move. Ask plainly. Make the plan. Don\'t wait for permission to be her friend.'},
+ {g:'♂',n:'Mars',lon:80,title:'Mars in Gemini',text:'Her drive scatters across several things at once (3.5 lives). Energy comes through ideas and banter. Match her pace; don\'t try to pin her to one lane.'},
+ {g:'♃',n:'Jupiter',lon:15,title:'Jupiter in Aries',text:'Luck finds her when she acts first. Bold friendships, bold moves to new cities. Encourage the leap; she expands by doing.'},
+ {g:'♄',n:'Saturn',lon:261,title:'Saturn in Sagittarius',text:'Her discipline is in the search for meaning and truth. She tests beliefs, including yours. Don\'t be precious about being challenged.'},
+ {g:'♅',n:'Uranus',lon:266,title:'Uranus in Sagittarius',text:'Generational: restless, freedom-loving, wants to explore. Fits the Albuquerque to Waco to Austin arc.'},
+ {g:'♆',n:'Neptune',lon:277,title:'Neptune in Capricorn, on the Ascendant',text:'The dreamer wearing a sensible coat. Intuition disguised as pragmatism. This is why she can start a beverage brand and also know in ten seconds whether you\'re full of it.'},
+ {g:'♇',n:'Pluto',lon:218,title:'Pluto in Scorpio',text:'Generational depth. She has lived through endings (the ex-husband, the brand) and come out rebuilt. Respect the scar tissue; don\'t poke it for sport.'},
+ {g:'☊',n:'North Node',lon:6,title:'North Node in Aries',text:'Her growth direction: self-definition, courage, going first. The best friends in her life will be the ones who cheer her independence, not the ones who need her to caretake.'}
+];
+const svg=document.getElementById('wheel'); const NS='http://www.w3.org/2000/svg';
+const cx=170, cy=170, R=160, Rin=118, Rp=138;
+const asc=278;
+function ang(lon){ return (180 + (lon-asc)) * Math.PI/180 * -1 + Math.PI; }
+function pt(r,lon){ const a=ang(lon); return [cx+r*Math.cos(a), cy-r*Math.sin(a)]; }
+function el(t,attrs,parent){ const e=document.createElementNS(NS,t); for(const k in attrs) e.setAttribute(k,attrs[k]); (parent||svg).appendChild(e); return e; }
+el('circle',{cx,cy,r:R,fill:'none',stroke:'#8FAE98',"stroke-width":1});
+el('circle',{cx,cy,r:Rin,fill:'none',stroke:'#8FAE98',"stroke-width":1,opacity:.6});
+el('circle',{cx,cy,r:60,fill:'none',stroke:'#8FAE98',"stroke-width":1,opacity:.35});
+for(let i=0;i<12;i++){
+  const [x1,y1]=pt(Rin,i*30),[x2,y2]=pt(R,i*30);
+  el('line',{x1,y1,x2,y2,stroke:'#8FAE98',"stroke-width":1,opacity:.7});
+  const [tx,ty]=pt((R+Rin)/2,i*30+15);
+  const t=el('text',{x:tx,y:ty+5,"text-anchor":'middle',class:'sign-label'}); t.style.fontSize='15px'; t.textContent=glyphs[i];
+}
+for(let d=0;d<360;d+=10){ const [x1,y1]=pt(Rin,d),[x2,y2]=pt(Rin-5,d); el('line',{x1,y1,x2,y2,stroke:'#8FAE98',"stroke-width":1,opacity:.5}); }
+const [ax,ay]=pt(Rin,asc),[dx,dy]=pt(Rin,asc+180); el('line',{x1:ax,y1:ay,x2:dx,y2:dy,stroke:'#C99A3C',"stroke-width":1.5,opacity:.8});
+const [mx,my]=pt(Rin,208.7),[ix,iy]=pt(Rin,28.7); el('line',{x1:mx,y1:my,x2:ix,y2:iy,stroke:'#C99A3C',"stroke-width":1,opacity:.5,"stroke-dasharray":'3 3'});
+const sorted=[...planets].sort((a,b)=>a.lon-b.lon); let last=-99;
+sorted.forEach(p=>{ p.vis=p.lon; if(p.vis-last<7) p.vis=last+7; last=p.vis; });
+const readout=document.getElementById('readout');
+sorted.forEach(p=>{
+  const [x,y]=pt(Rp,p.vis); const [lx,ly]=pt(Rin,p.lon); const [lx2,ly2]=pt(Rp-11,p.vis);
+  el('line',{x1:lx,y1:ly,x2:lx2,y2:ly2,stroke:'#8FAE98',"stroke-width":1,opacity:.6});
+  const g=el('g',{class:'planet',tabindex:0,role:'button','aria-label':p.title});
+  el('circle',{cx:x,cy:y,r:11,fill:'#24503D',stroke:'#8FAE98',"stroke-width":1},g);
+  const t=el('text',{x,y:y+4.5,"text-anchor":'middle'},g); t.textContent=p.g; if(p.g==='AC') t.style.fontSize='9px';
+  const sel=()=>{ document.querySelectorAll('.planet').forEach(q=>q.classList.remove('sel')); g.classList.add('sel');
+    readout.innerHTML=`<h3>${p.title}</h3><p>${p.text}</p>`; };
+  g.addEventListener('click',sel); g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();sel();} });
+});
+const ct=el('text',{x:cx,y:cy-4,"text-anchor":'middle',class:'sign-label'}); ct.style.fontSize='13px'; ct.textContent='Kelly';
+const ct2=el('text',{x:cx,y:cy+12,"text-anchor":'middle',class:'sign-label'}); ct2.textContent='5·1·87';
+const LLS=['Words','Time','Gifts','Acts','Touch'];
+let ll=store.get('kelly-ll',[0,0,0,0,0]);
+function renderLL(){
+  const box=document.getElementById('ll'); const max=Math.max(...ll);
+  box.innerHTML=LLS.map((n,i)=>`<button class="${max>0&&ll[i]===max?'hot':''}" onclick="bumpLL(${i})" aria-label="${n}: ${ll[i]}"><span class="n">${ll[i]}</span>${n}</button>`).join('');
+  const total=ll.reduce((a,b)=>a+b,0); const note=document.getElementById('ll-note');
+  if(!total) note.textContent='No data yet. Run the experiment for two weeks.';
+  else { const i=ll.indexOf(max); note.textContent=`${total} observations. Leading: ${LLS[i]} (${Math.round(max/total*100)}%). Keep running all five anyway; she notices.`; }
+}
+function bumpLL(i){ ll[i]++; store.set('kelly-ll',ll); renderLL(); }
+function resetLL(){ ll=[0,0,0,0,0]; store.set('kelly-ll',ll); renderLL(); }
+renderLL();
+const TXT={
+ 'Check in':[
+  'Status report: week out of 10? No explanation needed unless it\'s under a 6.',
+  'Thinking about you. That\'s the whole text.',
+  'Weekly audit: one thing that went right. Go.',
+  'No agenda. Just making sure Austin is treating you right this week.',
+  'How\'s the Taurus doing. Fed? Rested? Stubborn about something?'
+ ],
+ 'Banter':[
+  'I\'ve decided the beverage brand was ahead of its time. Austin wasn\'t ready.',
+  'Rate your morning in burgers. 1 = rough. 5 = thriving.',
+  'Your friend application is still under review. Strong candidate, though.',
+  'Found out you\'re a Gemini Moon. Explains the 3.5 lives.',
+  'Green shirt today. Felt like you should know you\'re influencing my wardrobe.'
+ ],
+ 'Burger':[
+  'Thursday. 7. Dan\'s. I\'m bringing a scorecard. In?',
+  'Found a contender. Need a second opinion from a certified burger professional.',
+  'Quest update: we\'re 2 for 7. Your pick next.',
+  'New rule: whoever picks a dud buys the next round. You in?',
+  'Heard a rumor about a burger on the east side. Investigating Saturday if you want in.'
+ ],
+ 'Hype her':[
+  'You\'ve rebuilt your life three and a half times in one city. Most people can\'t do it once. Just so you know I notice.',
+  'Whatever you\'re doing today, you\'re doing it better than you think.',
+  'Told someone about you today. Said "she\'s the most resilient person I know in Austin." Stand by it.',
+  'You don\'t need a pep talk but you\'re getting one: you\'re the real thing.'
+ ],
+ 'Go deeper':[
+  'Tell me the Baylor story. The whole thing. I have time.',
+  'What\'s a version of you that you miss?',
+  'What did the beverage brand teach you that nothing else could have?',
+  'Best decision you made this year that nobody noticed?',
+  'What\'s a thing you\'re really good at that you never get credit for?',
+  'If Austin life #4 starts tomorrow, what\'s in it?'
+ ],
+ 'Green':[
+  'Saw something green and thought of you. Standby for delivery.',
+  'Found the correct green. Sending proof.',
+  'Green chile question: red, green, or Christmas? This determines a lot.'
+ ]
+};
+let cat=Object.keys(TXT)[0], lastIdx=-1;
+function renderCats(){ document.getElementById('cats').innerHTML=Object.keys(TXT).map(c=>`<button class="${c===cat?'on':''}" onclick="setCat('${c}')">${c}</button>`).join(''); }
+function setCat(c){ cat=c; lastIdx=-1; renderCats(); nextTxt(); }
+function nextTxt(){ const pool=TXT[cat]; let i; do{ i=Math.floor(Math.random()*pool.length);}while(pool.length>1&&i===lastIdx); lastIdx=i; document.getElementById('txt').textContent=pool[i]; document.getElementById('copybtn').textContent='Copy'; }
+async function copyTxt(){ const t=document.getElementById('txt').textContent; const b=document.getElementById('copybtn'); try{ await navigator.clipboard.writeText(t); b.textContent='Copied'; }catch(e){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); b.textContent='Copied';}catch(_){ b.textContent='Long-press to copy'; } document.body.removeChild(ta);} setTimeout(()=>b.textContent='Copy',1500); }
+renderCats(); nextTxt();
+const notes=document.getElementById('notes'); notes.value=store.get('kelly-notes','');
+let nt; notes.addEventListener('input',()=>{ clearTimeout(nt); nt=setTimeout(()=>{ store.set('kelly-notes',notes.value); document.getElementById('notesnote').textContent='Saved on this phone.'; },400); document.getElementById('notesnote').textContent='Saving…'; });
+const STEPS=[
+ {t:'Be boringly consistent for 90 days',p:'Same-time check-ins. Follow through on small things. No last-minute cancels.',w:'Taurus Sun, Capricorn rising, Life Path 4. Nothing else works until this gate is passed.'},
+ {t:'Make the burger quest a joint project',p:'Build the bracket, one spot a week, scored together.',w:'Gate 19 (food, belonging) plus Gemini Moon (shared running jokes).'},
+ {t:'Get the Baylor story and the beverage-brand story in full',p:'Ask, then listen to the end without steering.',w:'Gemini Moon loves telling. Gate 33 is literally the storyteller key.'},
+ {t:'Run all five love languages on purpose',p:'Small doses of each. Log which one she lights up at on the Her tab.',w:'Soul Urge 33 and Expression 11 give in every language and feel the gap.'},
+ {t:'Be direct with asks and plans',p:'"Thursday, 7, Dan\'s. In?" beats "we should hang sometime."',w:'Aries Venus respects initiative. Neptune rising punishes vagueness.'},
+ {t:'Let her initiate and let her go quiet',p:'Hand her the plan every other time. When she disappears, don\'t chase.',w:'Likely Manifestor with splenic authority; 6th-line people recharge alone and come back.'}
+];
+let done=store.get('kelly-steps',[]);
+function renderSteps(){
+  const box=document.getElementById('steps');
+  box.innerHTML=STEPS.map((s,i)=>`<div class="step ${done.includes(i)?'done':''}">
+    <button class="chk" onclick="toggleStep(${i})" aria-pressed="${done.includes(i)}" aria-label="Mark step ${i+1} done"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg></button>
+    <div class="txt"><h3>${s.t}</h3><p>${s.p}</p><div class="why">${s.w}</div></div></div>`).join('');
+  document.getElementById('pbar').style.width=(done.length/STEPS.length*100)+'%';
+  document.getElementById('pnote').textContent=`${done.length} of ${STEPS.length}`+(done.length===STEPS.length?' — application approved.':'');
+}
+function toggleStep(i){ done=done.includes(i)?done.filter(x=>x!==i):[...done,i]; store.set('kelly-steps',done); renderSteps(); }
+renderSteps();
+const DEFAULT_B=[
+ {n:'Dan\'s Hamburgers',s:'Old-school, no frills'},
+ {n:'Casino El Camino',s:'Sixth Street legend, go hungry'},
+ {n:'JewBoy Burgers',s:'Smashed, El Paso-style'},
+ {n:'Hopdoddy',s:'The polished one'},
+ {n:'P. Terry\'s',s:'Austin\'s honest drive-thru'},
+ {n:'Crown & Anchor',s:'Campus pub burger'},
+ {n:'Fresa\'s',s:'Wildcard'}
+];
+let burgers=store.get('kelly-burgers', DEFAULT_B.map(b=>({...b,r:0})));
+function renderBurgers(){
+  const box=document.getElementById('burgers');
+  const list=[...burgers].map((b,i)=>({...b,i})).sort((a,b)=>b.r-a.r);
+  box.innerHTML=list.map((b,k)=>`<div class="burger">
+    <div class="rank">${b.r?k+1:'·'}</div>
+    <div class="name"><b>${b.n}</b><span>${b.s||''}</span></div>
+    <div class="stars" role="group" aria-label="Rate ${b.n}">${[1,2,3,4,5].map(s=>`<button class="${b.r>=s?'on':''}" onclick="rate(${b.i},${s})" aria-label="${s} stars">★</button>`).join('')}</div>
+  </div>`).join('');
+}
+function rate(i,s){ burgers[i].r = burgers[i].r===s?0:s; store.set('kelly-burgers',burgers); renderBurgers(); }
+function addBurger(){ const inp=document.getElementById('newb'); const v=inp.value.trim(); if(!v) return; burgers.push({n:v,s:'Her pick',r:0}); inp.value=''; store.set('kelly-burgers',burgers); renderBurgers(); }
+document.getElementById('newb').addEventListener('keydown',e=>{ if(e.key==='Enter') addBurger(); });
+renderBurgers();
+</script>
+</body>
+</html>

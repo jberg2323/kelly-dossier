@@ -1,0 +1,1 @@
+{"name": "The Kelly Dossier", "short_name": "Kelly", "start_url": "./", "display": "standalone", "background_color": "#17382B", "theme_color": "#17382B", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}], "scope": "./"}
